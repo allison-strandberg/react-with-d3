@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Data Visualization with React and D3</title>
+    <meta charset="utf-8">
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body { font-family: 'Droid Serif'; }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: normal;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+
+class: center, middle
+
+# Data Visualization with React and D3
+
+---
+
+# React
+
+React is a popular JavaScript framework. So far, Mapdwell is using it for GLIDE and the Mapdwell widget.
+--
+
+> React makes it painless to create interactive UIs. Design simple views for each state in your application, and React will efficiently update and render just the right components when your data changes. Declarative views make your code more predictable and easier to debug.
+https://reactjs.org/
+
+---
+
+# D3
+
+D3 is a JavaScript library popular for interactive graphs and other data visualizations.
+--
+
+>D3 allows you to bind arbitrary data to a Document Object Model (DOM), and then apply data-driven transformations to the document. For example, you can use D3 to generate an HTML table from an array of numbers. Or, use the same data to create an interactive SVG bar chart with smooth transitions and interaction.
+https://d3js.org/#introduction
+
+>D3 employs a declarative approach, operating on arbitrary sets of nodes called selections.
+https://d3js.org/#selections
+
+---
+
+# Drawing the line between React and D3
+
+In Amelia Wattenberger's excellent blog post, [React + D3.js](https://wattenberger.com/blog/react-and-d3), she recommends handling the DOM with React as much as possible.
+
+---
+
+class: center, middle
+
+# Creating an SVG DOM element
+
+---
+
+# Creating an SVG DOM element with D3
+
+```js
+const CircleD3 = () => {
+  const ref = useRef()
+
+  useEffect(() => {
+    const svgElement = d3.select(ref.current)
+    svgElement.append("circle")
+      .attr("cx", 150)
+      .attr("cy", 70)
+      .attr("r",  50)
+  }, [])
+
+  return (
+    <svg
+      ref={ref}
+    />
+  )
+}
+```
+
+---
+
+# Creating an SVG DOM element with React
+
+```js
+const CircleReact = () => {
+  return (
+    <svg>
+      <circle
+        cx="150"
+        cy="77"
+        r="40"
+      />
+    </svg>
+  )
+}
+```
+
+---
+# Why generate DOM elements using JSX instead of D3?
+
+1. Declarative instead of imperative
+  > Avoid using refs for anything that can be done declaratively. https://reactjs.org/docs/refs-and-the-dom.html#when-to-use-refs
+--
+
+2. Less code (17 vs 11 lines)
+--
+
+3. Makes use of React optimization
+> Internally, React uses several clever techniques to minimize the number of costly DOM operations required to update the UI.
+https://reactjs.org/docs/optimizing-performance.html
+
+---
+
+class: center, middle
+
+# Binding data to DOM elements
+
+---
+
+# Binding data to DOM elements with D3
+
+```js
+const CirclesD3 = () => {
+  const [dataset, setDataset] = useState(
+    generateDataset()
+  )
+  const ref = useRef()
+
+  useEffect(() => {
+    const svgElement = d3.select(ref.current)
+    svgElement.selectAll("circle")
+      .data(dataset)
+      .join("circle")
+        .attr("cx", d => d[0])
+        .attr("cy", d => d[1])
+        .attr("r",  3)
+  }, [dataset])
+
+  useInterval(() => {
+    const newDataset = generateDataset()
+    setDataset(newDataset)
+  }, 2000)
+
+  return (
+    <svg
+      viewBox="0 0 100 50"
+      ref={ref}
+    />
+  )
+}
+```
+
+---
+
+# Binding data to DOM elements with React
+
+```js
+const CirclesReact = () => {
+  const [dataset, setDataset] = useState(
+    generateDataset()
+  )
+
+  useInterval(() => {
+    const newDataset = generateDataset()
+    setDataset(newDataset)
+  }, 2000)
+
+  return (
+    <svg viewBox="0 0 100 50">
+      {dataset.map(([x, y], i) => (
+        <circle
+          cx={x}
+          cy={y}
+          r="3"
+        />
+      ))}
+    </svg>
+  )
+}
+```
+
+---
+    </textarea>
+    <script src="https://remarkjs.com/downloads/remark-latest.min.js">
+    </script>
+    <script>
+      var slideshow = remark.create();
+    </script>
+  </body>
+</html>
